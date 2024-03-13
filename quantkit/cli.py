@@ -26,7 +26,7 @@ def download(model, output, hf_cache, force_download, resume, safetensors_only):
 @click.option('--delete-original/--save-original', default=False, help='Delete pytorch model files after conversion')
 #@click.option('--output', '-out')
 def safetensor(model, delete_original):
-    """Download and convert a pytorch model to safetensor format."""
+    """Download and/or convert a pytorch model to safetensor format."""
     click.echo(f"safetensor | model: {model} | delete_original: {delete_original}")
     run_safetensor(model, delete_original)
 
@@ -36,7 +36,7 @@ def safetensor(model, delete_original):
 #@click.option('--output', '-out', help='output name')
 #@click.option('--cal-file', help='Specify calibration dataset')
 #def gguf(model, quant_type, output, cal_file):
-#    """Download and convert a model to GGUF format."""
+#    """Download and/or convert a model to GGUF format."""
 #    click.echo(f"gguf | mnodel: {model} | quant_type: {quant_type} | out: {output} | cal_file: {cal_file}")
 #    run_gguf(model, quant_type, output, hf_cache, cal_file)
 
@@ -48,7 +48,7 @@ def safetensor(model, delete_original):
 @click.option('--group-size', default=128, help='Group size')
 @click.option('--zero-point/--no-zero-point', default=True, help='Zero point')
 def awq(model, output, hf_cache, bits, group_size, zero_point):
-    """Download and convert a model to AWQ format."""
+    """Download and/or convert a model to AWQ format."""
     click.echo(f"awq | mnodel: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | group_size: {group_size} | zero_point: {zero_point}")
     run_awq(model, output, hf_cache, bits, group_size, zero_point)
 
@@ -60,7 +60,7 @@ def awq(model, output, hf_cache, bits, group_size, zero_point):
 @click.option('--group-size', default=128, help='Group size')
 @click.option('--act-order/--no-act-order', default=True, help='Activation order / desc_act')
 def gptq(model, output, hf_cache, bits, group_size, act_order):
-    """Download and convert a model to GPTQ format."""
+    """Download and/or convert a model to GPTQ format."""
     click.echo(f"gptq | mnodel: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | group_size: {group_size} | act_order: {act_order}")
     run_gptq(model, output, hf_cache, bits, group_size, act_order)
 
@@ -72,7 +72,7 @@ def gptq(model, output, hf_cache, bits, group_size, act_order):
 @click.option('--head-bits', '-hb', type=click.Choice(['6', '8']), default='8', help='Bits / bpw for head layer (default: 8)')
 @click.option('--new-measurement/--no-new-measurement', default=False, help='Take a new measurement')
 def exl2(model, output, hf_cache, bits, head_bits, new_measurement):
-    """Download and convert a model to EXL2 format."""
+    """Download and/or convert a model to EXL2 format."""
     click.echo(f"exl2 | mnodel: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | head_bits: {head_bits} | new_measurement: {new_measurement}")
     run_exl2(model, output, hf_cache, bits, int(head_bits), new_measurement)
 
