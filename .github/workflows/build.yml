@@ -1,0 +1,11 @@
+jobs:
+  build_sdist_and_wheel:
+    name: Build source distribution and pure-Python wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: build
+        uses: OpenAstronomy/build-python-dist@v1
+        with:
+          pure_python_wheel: true
+
