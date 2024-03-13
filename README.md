@@ -10,16 +10,30 @@ pip3 install llm-quantkit
 
 # Usage
 
+```
+Usage: quantkit [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  download    Download model from huggingface.
+  safetensor  Download and/or convert a pytorch model to safetensor format.
+  awq         Download and/or convert a model to AWQ format.
+  exl2        Download and/or convert a model to EXL2 format.
+  gptq        Download and/or convert a model to GPTQ format.
+```
+
 Download a model from HF and don't use HF cache:
 ```
-quantkit teknium/Hermes-Trismegistus-Mistral-7B --no-cache
+quantkit download teknium/Hermes-Trismegistus-Mistral-7B --no-cache
 ```
 <br/>
 
 
 Only download the safetensors version of a model (useful for models that have both safetensors and pytorch):
 ```
-quantkit mistralai/Mistral-7B-v0.1 --no-cache --safetensors-only -out mistral7b
+quantkit download mistralai/Mistral-7B-v0.1 --no-cache --safetensors-only -out mistral7b
 ```
 <br/>
 
@@ -40,7 +54,7 @@ quantkit awq mistralai/Mistral-7B-v0.1 -out Mistral-7B-v0.1-AWQ
 
 Convert a model to GPTQ (4 bits / group-size 32):
 ```
-quantkit awq Mistral-7B-v0.1 -out Mistral-7B-v0.1-AWQ -b 4 --group-size 32
+quantkit gptq mistral7b -out Mistral-7B-v0.1-AWQ -b 4 --group-size 32
 ```
 <br/>
 
