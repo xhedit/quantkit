@@ -7,7 +7,7 @@ name = "llm-quantkit"
 description = "cli tool for downloading and quantizing LLMs"
 readme = "README.md"
 license = { text = "LGPL-3.0-or-later" }
-version = "0.13"
+version = "0.14"
 authors = [{ name = "xhedit", email = "jevd@protonmail.com" }]
 dependencies = [
     "click",
