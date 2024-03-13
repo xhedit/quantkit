@@ -31,14 +31,14 @@ quantkit download teknium/Hermes-Trismegistus-Mistral-7B --no-cache
 <br/>
 
 
-Only download the safetensors version of a model (useful for models that have both safetensors and pytorch):
+Only download the safetensors version of a model (useful for models that have torch and safetensor):
 ```
 quantkit download mistralai/Mistral-7B-v0.1 --no-cache --safetensors-only -out mistral7b
 ```
 <br/>
 
 
-Download and convert a model to safetensors, deleting the original pytorch bins:
+Download and convert a model to safetensor, deleting the original pytorch bins:
 ```
 quantkit safetensor migtissera/Tess-10.7B-v1.5b --delete-original
 ```
@@ -54,7 +54,7 @@ quantkit awq mistralai/Mistral-7B-v0.1 -out Mistral-7B-v0.1-AWQ
 
 Convert a model to GPTQ (4 bits / group-size 32):
 ```
-quantkit gptq mistral7b -out Mistral-7B-v0.1-AWQ -b 4 --group-size 32
+quantkit gptq mistral7b -out Mistral-7B-v0.1-GPTQ -b 4 --group-size 32
 ```
 <br/>
 
