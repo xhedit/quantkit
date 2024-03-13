@@ -78,7 +78,7 @@ def exl2(model, output, hf_cache, bits, head_bits, new_measurement):
 
 run.add_command(download)
 run.add_command(safetensor)
-run.add_command(gguf)
+#run.add_command(gguf)
 run.add_command(awq)
 run.add_command(gptq)
 run.add_command(exl2)
