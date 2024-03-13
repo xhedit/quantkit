@@ -30,15 +30,15 @@ def safetensor(model, delete_original):
     click.echo(f"safetensor | model: {model} | delete_original: {delete_original}")
     run_safetensor(model, delete_original)
 
-@run.command()
-@click.argument('model', required=True)
-@click.argument('quant_type', required=True)
-@click.option('--output', '-out', help='output name')
-@click.option('--cal-file', help='Specify calibration dataset')
-def gguf(model, quant_type, output, cal_file):
-    """Download and convert a model to GGUF format."""
-    click.echo(f"gguf | mnodel: {model} | quant_type: {quant_type} | out: {output} | cal_file: {cal_file}")
-    run_gguf(model, quant_type, output, hf_cache, cal_file)
+#@run.command()
+#@click.argument('model', required=True)
+#@click.argument('quant_type', required=True)
+#@click.option('--output', '-out', help='output name')
+#@click.option('--cal-file', help='Specify calibration dataset')
+#def gguf(model, quant_type, output, cal_file):
+#    """Download and convert a model to GGUF format."""
+#    click.echo(f"gguf | mnodel: {model} | quant_type: {quant_type} | out: {output} | cal_file: {cal_file}")
+#    run_gguf(model, quant_type, output, hf_cache, cal_file)
 
 @run.command()
 @click.argument('model', required=True)
