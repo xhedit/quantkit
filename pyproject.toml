@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quantkit"
-description = "Tool for quantizing pre-trained large language models"
+description = "cli tool for downloading and quantizing LLMs"
 readme = "README.md"
 license = { text = "LGPL-3.0-or-later" }
-version = "0.1"
+version = "0.13"
 authors = [{ name = "xhedit", email = "jevd@protonmail.com" }]
 dependencies = [
     "click",
