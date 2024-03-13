@@ -12,7 +12,7 @@ pip3 install llm-quantkit
 
 Download a model from HF and don't use HF cache:
 ```
-quantkit teknium/Hermes-Trismegistus-Mistral-7B --no-cache -out 
+quantkit teknium/Hermes-Trismegistus-Mistral-7B --no-cache
 ```
 <br/>
 
