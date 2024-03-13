@@ -23,6 +23,11 @@ jobs:
         with:
           pure_python_wheel: true
 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: 'sdist'
+          path: ./dist/*
+
   publish-sdist-to-pypi:
     name: Publish Python distribution to PyPI
     if: inputs.pypi == '1'
@@ -43,3 +48,6 @@ jobs:
           path: dist/
       - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@v1.8.10
+
+
+
