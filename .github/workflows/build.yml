@@ -1,3 +1,17 @@
+name: Build Wheels & Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      pypi:
+        description: 'Upload wheels to PyPI? 1 = yes, 0 = no'
+        default: '0'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
 jobs:
   build_sdist_and_wheel:
     name: Build source distribution and pure-Python wheel
@@ -9,3 +23,23 @@ jobs:
         with:
           pure_python_wheel: true
 
+  publish-sdist-to-pypi:
+    name: Publish Python distribution to PyPI
+    if: inputs.pypi == '1'
+    needs: build_sdist_and_wheel
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: pypi
+      url: https://pypi.org/p/llm-quantkit
+    permissions:
+      id-token: write  # IMPORTANT: mandatory for trusted publishing
+      
+    steps:
+      - name: Download the sdist
+        uses: actions/download-artifact@v3
+        with:
+          name: sdist
+          path: dist/
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.8.10
