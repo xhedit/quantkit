@@ -6,8 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "llm-quantkit"
 description = "cli tool for downloading and quantizing LLMs"
 readme = "README.md"
-license = { text = "LGPL-3.0-or-later" }
-version = "0.15"
+license = { text = "MIT License" }
+version = "0.16"
 authors = [{ name = "xhedit", email = "jevd@protonmail.com" }]
 dependencies = [
     "click",
