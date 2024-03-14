@@ -24,6 +24,16 @@ Commands:
   gptq        Download and/or convert a model to GPTQ format.
 ```
 
+The first argument after command should be an HF repo id (mistralai/Mistral-7B-v0.1) or a local directory with model files in it already.
+--hf-cache downloads the model to the HF cache and places symlinks to it in the output directory. <br/>
+--no-cache downloads the model to the output directory without symlinks. <br/>
+
+AWQ defaults to 4 bits, group size 128, zero-point True. <br />
+GPTQ defaults are 4 bits, group size 128, activation-order True. <br />
+EXL2 defaults to 8 head bits but there is no default bitrate. <br />
+
+# Examples
+
 Download a model from HF and don't use HF cache:
 ```
 quantkit download teknium/Hermes-Trismegistus-Mistral-7B --no-cache
