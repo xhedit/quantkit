@@ -29,7 +29,7 @@ The first argument after command should be an HF repo id (mistralai/Mistral-7B-v
 --no-cache downloads the model to the output directory without symlinks. <br/>
 
 AWQ defaults to 4 bits, group size 128, zero-point True. <br />
-GPTQ defaults are 4 bits, group size 128, activation-order True. <br />
+GPTQ defaults are 4 bits, group size 128, activation-order False. <br />
 EXL2 defaults to 8 head bits but there is no default bitrate. <br />
 
 # Examples
