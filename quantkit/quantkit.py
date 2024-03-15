@@ -54,7 +54,7 @@ def run_awq(model, output, hf_cache, bits, group_size, zero_point, gemm):
         path = Path(model_dir)
 
         from huggingface_hub import snapshot_download
-        snapshot_download(model, local_dir=path, local_dir_use_symlinks=False, resume_download=True)
+        snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
 
     import torch
     from awq import AutoAWQForCausalLM
@@ -105,7 +105,7 @@ def run_gptq(model, output, hf_cache, bits, group_size, damp, sym, true_seq, act
         path = Path(model_dir)
 
         from huggingface_hub import snapshot_download
-        snapshot_download(model, local_dir=path, local_dir_use_symlinks=False, resume_download=True)
+        snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
 
     import torch
     from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
@@ -151,7 +151,7 @@ def run_gptq(model, output, hf_cache, bits, group_size, damp, sym, true_seq, act
     dt_pq = datetime.datetime.now()
     print(f"Quantization complete ({str(end-start)} seconds) at {str(dt_pq)}")
 
-def run_exl2(model, output, hf_cache, bits, head_bits, new_measurement):
+def run_exl2(model, output, hf_cache, bits, head_bits, rope_alpha, rope_scale, only_measurement, no_resume):
     path = Path(model)
     if path.is_dir():
         if Path(path / "config.json").is_file():
@@ -164,28 +164,36 @@ def run_exl2(model, output, hf_cache, bits, head_bits, new_measurement):
         path = Path(model_dir)
 
         from huggingface_hub import snapshot_download
-        snapshot_download(model, local_dir=path, local_dir_use_symlinks=False, resume_download=True)
-        convert_multi(model_dir, del_pytorch_model=delete_original)
+        snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
+
+        if not Path(path / "model.safetensors").is_file() and not Path(path / "model.safetensors.index.json").is_file():
+            convert_multi(model_dir, del_pytorch_model=True)
 
     import torch
     from exl2conv.conversion.qparams import qparams_headoptions
     from exl2conv.conversion.convert import convert_hf_to_exl2
 
+    if output is None:
+        compile_full = model_dir + "-exl2"
+    else:
+        compile_full = output
+
     cal_dataset = None
+    length = 2048
     dataset_rows = 100
     measurement_rows = 16
-    length = 2048
     measurement_length = 2048
     shard_size = 8192
     measurement = None
-    compile_full = None
-    no_resume = None
-    no_resume = True
-    output_measurement = None
+
+    output_measurement = str(Path(model_dir) / "measurement.json")
+
+    if only_measurement:
+        no_resume = True
 
     job = {
         "in_dir": model_dir,
-        "out_dir": model_dir + "-exl2",
+        "out_dir": model_dir + "-exl2.tmp",
         "cal_dataset": cal_dataset,
         "bits": float(bits),
         "dataset_rows": int(dataset_rows),
@@ -196,17 +204,30 @@ def run_exl2(model, output, hf_cache, bits, head_bits, new_measurement):
         "head_bits": int(head_bits),
         "shard_size": shard_size if shard_size > 0 else 1024 ** 3,  # 1 PB = unlimited,
         "compile_full": compile_full,
-        #"rope_scale": float(rope_scale),
-        #"rope_alpha": float(rope_alpha),
         "no_resume": no_resume,
         "output_measurement": output_measurement,
     }
+
+    if rope_alpha is not None:
+        job["rope_alpha"] = float(rope_alpha)
+    if rope_scale is not None:
+        job["rope_scale"] = float(rope_scale)
 
     dt_start = datetime.datetime.now()
     print(f"Starting exl2 quantization for {model_dir} at {str(dt_start)}")
     start = time.perf_counter()
 
-    convert_hf_to_exl2(job)
+    # take measurement if necessary
+    if Path(path / "measurement.json").is_file() and not only_measurement:
+        job["measurement"] = str(Path(model_dir) / "measurement.json")
+    else:
+        convert_hf_to_exl2(job)
+
+    if not only_measurement:
+        job["output_measurement"] = None
+        job["measurement"] = str(Path(path / "measurement.json"))
+        job["no_resume"] = True
+        convert_hf_to_exl2(job)
 
     gc.collect()
     torch.cuda.empty_cache()

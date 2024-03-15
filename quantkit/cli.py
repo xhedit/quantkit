@@ -50,7 +50,7 @@ def safetensor(model, delete_original):
 @click.option('--gemm/--gemv', default=True, help='GEMM or GEMV')
 def awq(model, output, hf_cache, bits, group_size, zero_point, gemm):
     """Download and/or convert a model to AWQ format."""
-    click.echo(f"awq | mnodel: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | group_size: {group_size} | zero_point: {zero_point} | gemm: {gemm}")
+    click.echo(f"awq | model: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | group_size: {group_size} | zero_point: {zero_point} | gemm: {gemm}")
     run_awq(model, output, hf_cache, bits, group_size, zero_point, gemm)
 
 @run.command()
@@ -78,11 +78,14 @@ def gptq(model, output, hf_cache, bits, group_size, damp, sym, true_seq, act_ord
 @click.option('--hf-cache/--no-cache', default=True, help='Use huggingface cache dir.')
 @click.option('--bits', '-b', required=True, help='Bits / bpw')
 @click.option('--head-bits', '-hb', type=click.Choice(['6', '8']), default='8', help='Bits / bpw for head layer (default: 8)')
-@click.option('--new-measurement/--no-new-measurement', default=False, help='Take a new measurement')
-def exl2(model, output, hf_cache, bits, head_bits, new_measurement):
+@click.option('--rope-alpha', '-ra', help='RoPE alpha value')
+@click.option('--rope-scale', '-rs', help='RoPE scale factor, required for some models (deepseek-33b should be 4)')
+@click.option('--only-measurement', '-om', default=False, is_flag=True, help='take measurement only')
+@click.option('--no-resume/--resume', '-nr/-r', default=False, help='do not attempt to resume job')
+def exl2(model, output, hf_cache, bits, head_bits, rope_alpha, rope_scale, only_measurement, no_resume):
     """Download and/or convert a model to EXL2 format."""
-    click.echo(f"exl2 | mnodel: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | head_bits: {head_bits} | new_measurement: {new_measurement}")
-    run_exl2(model, output, hf_cache, bits, int(head_bits), new_measurement)
+    click.echo(f"exl2 | model: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | head_bits: {head_bits} | rope_alpha: {rope_alpha} | rope_scale: {rope_scale} | only_measurement: {only_measurement} | no_resume: {no_resume}")
+    run_exl2(model, output, hf_cache, bits, int(head_bits), rope_alpha, rope_scale, only_measurement, no_resume)
 
 run.add_command(download)
 run.add_command(safetensor)
