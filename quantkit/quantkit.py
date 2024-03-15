@@ -41,7 +41,7 @@ def run_gguf(model, quant_type, output, hf_cache, cal_file):
 
 
 
-def run_awq(model, output, hf_cache, bits, group_size, zero_point):
+def run_awq(model, output, hf_cache, bits, group_size, zero_point, gemm):
     path = Path(model)
     if path.is_dir():
         if Path(path / "config.json").is_file():
@@ -67,6 +67,8 @@ def run_awq(model, output, hf_cache, bits, group_size, zero_point):
 
     quant_path = output
     quant_config = { "zero_point": zero_point, "q_group_size": group_size, "w_bit": bits, "version": "GEMM" }
+    if not gemm:
+        quant_config["version"] = "GEMV"
 
     dt_start = datetime.datetime.now()
     print(f"Starting awq quantization for {quant_path} at {str(dt_start)}")
@@ -90,7 +92,7 @@ def run_awq(model, output, hf_cache, bits, group_size, zero_point):
     dt_pq = datetime.datetime.now()
     print(f"Quantization complete ({str(end-start)} seconds) at {str(dt_pq)}")
 
-def run_gptq(model, output, hf_cache, bits, group_size, act_order):
+def run_gptq(model, output, hf_cache, bits, group_size, damp, sym, true_seq, act_order):
     path = Path(model)
     if path.is_dir():
         if Path(path / "config.json").is_file():
@@ -113,6 +115,8 @@ def run_gptq(model, output, hf_cache, bits, group_size, act_order):
         bits=bits,
         group_size=group_size,
         desc_act=act_order,
+        sym=sym,
+        true_sequential=true_seq
     )
 
     model_path = model_dir
