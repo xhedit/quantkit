@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "llm-quantkit"
 description = "cli tool for downloading and quantizing LLMs"
 readme = "README.md"
-license = { text = "LGPL-3.0-or-later" }
+license = { text = "MIT License" }
 version = "0.18"
 authors = [{ name = "xhedit", email = "jevd@protonmail.com" }]
 dependencies = [
@@ -20,7 +20,7 @@ dependencies = [
     "auto-gptq",
     "autoawq",
     "exl2conv",
-    "llama-cpp-conv",
+    "llama_cpp_conv",
     "sentencepiece"
 ]
 
