@@ -2,11 +2,14 @@
 # supports: AWQ, GPTQ, and EXL2
 
 import gc
+import os
+import site
 import time
 import datetime
 
 from pathlib import Path
 from quantkit.safetensor import convert_multi
+from quantkit.convert import do_gguf_conversion
 
 def run_download(model, output, hf_cache, force_download, resume_download, safetensors_only):
     if output is None:
@@ -34,12 +37,103 @@ def run_safetensor(model, delete_original):
         snapshot_download(model, local_dir=path, local_dir_use_symlinks=False, resume_download=True)
         convert_multi(model_dir, del_pytorch_model=delete_original)
 
-def run_gguf(model, quant_type, output, hf_cache, cal_file):
+def run_gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, cal_file, n_gpu_layers):
+    if not Path(cal_file).is_file():
+        print(f"quantkit: could not load {cal_file}")
+        return
+
+    path = Path(model)
+    if path.is_dir():
+        if Path(path / "config.json").is_file():
+            model_dir = path
+        else:
+            click.echo("no config.json found in model dir")
+            return
+    else:
+        model_dir = model.split("/")[1]
+        path = Path(model_dir)
+
+        from huggingface_hub import snapshot_download
+        snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
+
+    do_step_two = False
+
+    #if lower(quant_type) not in ["F32", "F16", "Q8_0"]:
+    if quant_type.lower() not in [x.lower() for x in ["F32", "F16", "Q8_0"]]:
+        # two step
+        if quant_type.lower() not in [x.lower() for x in ["Q4_0", "Q4_1", "Q5_0", "Q5_1", "Q8_0", "Q8_1", "Q2_K", "IQ3_XS",
+                                                          "Q3_K", "Q4_K", "Q5_K", "Q6_K", "Q8_K", "IQ2_XXS", "IQ2_XS", "IQ3_XXS",
+                                                          "Q2_K_S", "Q3_K_S", "Q3_K_M", "Q3_K_L", "Q4_K_S", "Q4_K_M", "Q5_K_S", "Q5_K_M",
+                                                          "IQ1_S", "IQ4_NL", "IQ3_S", "IQ2_S", "IQ4_XS", "IQ2_M", "IQ3_M"] ]:
+            raise ValueError("quant_type must be a valid gguf quant type")
+        step_two = quant_type
+        do_step_two = True
+        quant_type = "F32" if f32 else "F16"
+
+    # fix vocab here
+
+    if output is None:
+        output = model_dir + "_" + (step_two.upper() or quant_type.upper()) + ".gguf"
+
+    #def do_gguf_conversion(model: str, output: str, out_type: str, vocab_dir: str, vocab_type: str, context: int, pad_vocab: bool, concurrency: bool, big_endian: bool) -> None:
+    if do_step_two:
+        do_gguf_conversion(Path(model_dir), "tmp.gguf", quant_type.lower(), None, "spm,hfft", -1, False, False, False)
+
+        if built_in_imatrix or (imatrix is None and cal_file is not None):
+            imatrix = run_imatrix(cal_file, n_gpu_layers)
+
+        quantize("tmp.gguf", output, step_two, imatrix)
+    else:
+        do_gguf_conversion(Path(model_dir), output, quant_type.lower(), None, "spm,hfft", -1, False, False, False)
+
+    if not keep:
+        os.remove("tmp.gguf")
+        print("deleted tmp.gguf")
+    print(f"Finished with {output}")
+
+def run_imatrix(cal_file, n_gpu_layers):
+    import site
+    import shlex
+    import subprocess
+
+    site_dir = site.getusersitepackages()
+    imatrix = Path(site_dir) / "bin" / "imatrix"
+    print(f"Attempting to execute {imatrix}")
+
     if cal_file is None:
-        # no imat
-        pass
+        download_wikitrain()
+        cal_file = "wiki.train.raw"
 
+    if n_gpu_layers is None or n_gpu_layers < 0:
+        n_gpu_layers = 0
 
+    imatrix_args = shlex.split(f"{imatrix} -m tmp.gguf -f {cal_file} -o imatrix.dat -ofreq 128 -ngl {n_gpu_layers}")
+
+    p = subprocess.Popen(imatrix_args, stdin=None, stdout=None)
+    p.wait()
+
+def quantize(gguf_file, output, quant_type, imatrix):
+    if quant_type.lower() not in [x.lower() for x in ["Q4_0", "Q4_1", "Q5_0", "Q5_1", "Q8_0", "Q8_1", "Q2_K", "IQ3_XS",
+                                                      "Q3_K", "Q4_K", "Q5_K", "Q6_K", "Q8_K", "IQ2_XXS", "IQ2_XS", "IQ3_XXS",
+                                                      "Q2_K_S", "Q3_K_S", "Q3_K_M", "Q3_K_L", "Q4_K_S", "Q4_K_M", "Q5_K_S", "Q5_K_M",
+                                                      "IQ1_S", "IQ4_NL", "IQ3_S", "IQ2_S", "IQ4_XS", "IQ2_M", "IQ3_M"] ]:
+        raise ValueError("quant_type must be a valid gguf quant type")
+
+    import site
+    import shlex
+    import subprocess
+
+    site_dir = site.getusersitepackages()
+    quantize = Path(site_dir) / "bin" / "quantize"
+    print(f"Attempting to execute {quantize}")
+
+    if imatrix is None:
+        quantize_args = shlex.split(f"{quantize} {gguf_file} {output} {quant_type.upper()}")
+    else:
+        quantize_args = shlex.split(f"{quantize} --imatrix {imatrix} {gguf_file} {output} {quant_type.upper()}")
+
+    p = subprocess.Popen(quantize_args, stdin=None, stdout=None)
+    p.wait()
 
 def run_awq(model, output, hf_cache, bits, group_size, zero_point, gemm):
     path = Path(model)
@@ -236,6 +330,17 @@ def run_exl2(model, output, hf_cache, bits, head_bits, rope_alpha, rope_scale, o
     dt_pq = datetime.datetime.now()
     print(f"Quantization complete ({str(end-start)} seconds) at {str(dt_pq)}")
 
+def download_wikitrain():
+    import requests
+    import gzip
+    url = "https://huggingface.co/datasets/ikawrakow/validation-datasets-for-llama.cpp/resolve/main/wiki.train.raw.gz"
+
+#    try:
+    response = requests.get(url)
+    with open("wiki.train.raw", "wb") as f:
+        f.write(gzip.decompress(response.content))
+#    except Exception:
+#        raise ValueError(f"Error downloading {url}")
 
 def get_wikitext2(nsamples, seed, seqlen, model):
     import numpy as np
