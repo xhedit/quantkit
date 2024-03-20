@@ -98,7 +98,7 @@ def run_imatrix(cal_file, n_gpu_layers):
     import platform
     import subprocess
 
-    binary_ext = ".exe" if platform.system() is "Windows" else ""
+    binary_ext = ".exe" if platform.system() == "Windows" else ""
 
     site_dir = site.getusersitepackages()
     imatrix = Path(site_dir) / "bin" / ("imatrix" + binary_ext)
@@ -108,9 +108,9 @@ def run_imatrix(cal_file, n_gpu_layers):
             p = Path(d)
             if(p / "bin" / ("imatrix" + binary_ext)).is_file():
                 site_dir = p
-                quantize = p / "bin" / ("imatrix" + binary_ext)
+                imatrix = p / "bin" / ("imatrix" + binary_ext)
 
-    print(f"Attempting to execute {imatrix}")
+    print(f"Path to binary is: {imatrix}")
 
     if cal_file is None:
         download_wikitrain()
@@ -119,8 +119,10 @@ def run_imatrix(cal_file, n_gpu_layers):
     if n_gpu_layers is None or n_gpu_layers < 0:
         n_gpu_layers = 0
 
-    imatrix_args = shlex.split(f"{imatrix} -m tmp.gguf -f {cal_file} -o imatrix.dat -ofreq 128 -ngl {n_gpu_layers}")
+    args = f"{imatrix} -m tmp.gguf -f {cal_file} -o imatrix.dat -ofreq 128 -ngl {n_gpu_layers}"
+    imatrix_args = args if platform.system() == "Windows" else shlex.split(args)
 
+    print(f"Attempting to execute {imatrix_args}")
     p = subprocess.Popen(imatrix_args, stdin=None, stdout=None)
     p.wait()
 
@@ -136,7 +138,7 @@ def quantize(gguf_file, output, quant_type, imatrix):
     import platform
     import subprocess
 
-    binary_ext = ".exe" if platform.system() is "Windows" else ""
+    binary_ext = ".exe" if platform.system() == "Windows" else ""
 
     site_dir = site.getusersitepackages()
     quantize = Path(site_dir) / "bin" / ("quantize" + binary_ext)
@@ -148,13 +150,16 @@ def quantize(gguf_file, output, quant_type, imatrix):
                 site_dir = p
                 quantize = p / "bin" / ("quantize" + binary_ext)
 
-    print(f"Attempting to execute {quantize}")
+    print(f"Path to binary is: {quantize}")
 
     if imatrix is None:
-        quantize_args = shlex.split(f"{quantize} {gguf_file} {output} {quant_type.upper()}")
+        args = f"{quantize} {gguf_file} {output} {quant_type.upper()}"
+        quantize_args = args if platform.system() == "Windows" else shlex.split(args)
     else:
-        quantize_args = shlex.split(f"{quantize} --imatrix {imatrix} {gguf_file} {output} {quant_type.upper()}")
+        args = f"{quantize} --imatrix {imatrix} {gguf_file} {output} {quant_type.upper()}"
+        quantize_args = args if platform.system() == "Windows" else shlex.split(args)
 
+    print(f"Attempting to execute {quantize_args}")
     p = subprocess.Popen(quantize_args, stdin=None, stdout=None)
     p.wait()
 
@@ -393,3 +398,4 @@ def get_wikitext2(nsamples, seed, seqlen, model):
         attention_mask = torch.ones_like(inp)
         traindataset.append({'input_ids':inp,'attention_mask': attention_mask})
     return traindataset, testenc
+
