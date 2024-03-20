@@ -36,7 +36,7 @@ def safetensor(model, delete_original):
 @click.option('--output', '-out', help='output name')
 @click.option('--keep/--delete', help='keep intermediate conversion GGUF')
 @click.option('--f32/--f16', default=False, help='intermediate conversion step uses f32 (requires much more disk space)')
-@click.option('--built-in-imatrix/--disable-built-in-imatrix', default=True, help='use built in imatrix')
+@click.option('--built-in-imatrix/--disable-built-in-imatrix', default=False, help='use built in imatrix')
 @click.option('--imatrix', help='Specify pre-generated imatrix')
 @click.option('--cal-file', help='Specify calibration dataset')
 @click.option('--n-gpu-layers', "-ngl",  default=0, help='how many layers to offload to GPU for imatrix')

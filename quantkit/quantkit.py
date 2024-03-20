@@ -38,9 +38,10 @@ def run_safetensor(model, delete_original):
         convert_multi(model_dir, del_pytorch_model=delete_original)
 
 def run_gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, cal_file, n_gpu_layers):
-    if not Path(cal_file).is_file():
-        print(f"quantkit: could not load {cal_file}")
-        return
+    if cal_file is not None:
+        if not Path(cal_file).is_file():
+            print(f"quantkit: could not load {cal_file}")
+            return
 
     path = Path(model)
     if path.is_dir():
@@ -98,6 +99,13 @@ def run_imatrix(cal_file, n_gpu_layers):
 
     site_dir = site.getusersitepackages()
     imatrix = Path(site_dir) / "bin" / "imatrix"
+
+    if not imatrix.is_file():
+        for d in site.getsitepackages():
+            if(Path(d) / "bin" / "imatrix").is_file():
+                site_dir = d
+                imatrix = d / "bin" / "imatrix"
+
     print(f"Attempting to execute {imatrix}")
 
     if cal_file is None:
@@ -125,6 +133,13 @@ def quantize(gguf_file, output, quant_type, imatrix):
 
     site_dir = site.getusersitepackages()
     quantize = Path(site_dir) / "bin" / "quantize"
+
+    if not quantize.is_file():
+        for d in site.getsitepackages():
+            if(Path(d) / "bin" / "quantize").is_file():
+                site_dir = d
+                quantize = d / "bin" / "quantize"
+
     print(f"Attempting to execute {quantize}")
 
     if imatrix is None:
