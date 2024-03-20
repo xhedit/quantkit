@@ -65,7 +65,7 @@ quantkit safetensor migtissera/Tess-10.7B-v1.5b --delete-original
 
 Download and convert a model to GGUF (Q5_K):
 ```
-quantkit gguf TinyLlama/TinyLlama-1.1B-Chat-v1.0 -out TinyLlama-1.1B Q5_K
+quantkit gguf TinyLlama/TinyLlama-1.1B-Chat-v1.0 -out TinyLlama-1.1B-Q5_K.gguf Q5_K
 ```
 
 <br/>
@@ -73,7 +73,7 @@ quantkit gguf TinyLlama/TinyLlama-1.1B-Chat-v1.0 -out TinyLlama-1.1B Q5_K
 
 Download and convert a model to GGUF using an imatrix, offloading 200 layers:
 ```
-quantkit gguf TinyLlama/TinyLlama-1.1B-Chat-v1.0 -out TinyLlama-1.1B IQ4_XS --built-in-imatrix -ngl 200
+quantkit gguf TinyLlama/TinyLlama-1.1B-Chat-v1.0 -out TinyLlama-1.1B-IQ4_XS.gguf IQ4_XS --built-in-imatrix -ngl 200
 ```
 
 <br/>
