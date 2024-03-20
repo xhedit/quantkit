@@ -7,7 +7,7 @@ from quantkit.quantkit import run_download, run_safetensor, run_gguf, run_awq, r
 
 @click.group()
 def run():
-    click.echo("quantkit v0.1")
+    click.echo("quantkit v0.2")
 
 @run.command()
 @click.argument('model', required=True)
