@@ -105,9 +105,10 @@ def run_imatrix(cal_file, n_gpu_layers):
 
     if not imatrix.is_file():
         for d in site.getsitepackages():
-            if(Path(d) / "bin" / ("imatrix" + binary_ext)).is_file():
-                site_dir = d
-                imatrix = d / "bin" / "imatrix"
+            p = Path(d)
+            if(p / "bin" / ("imatrix" + binary_ext)).is_file():
+                site_dir = p
+                quantize = p / "bin" / ("imatrix" + binary_ext)
 
     print(f"Attempting to execute {imatrix}")
 
@@ -142,9 +143,10 @@ def quantize(gguf_file, output, quant_type, imatrix):
 
     if not quantize.is_file():
         for d in site.getsitepackages():
-            if(Path(d) / "bin" / ("quantize" + binary_ext)).is_file():
-                site_dir = d
-                quantize = d / "bin" / "quantize"
+            p = Path(d)
+            if(p / "bin" / ("quantize" + binary_ext)).is_file():
+                site_dir = p
+                quantize = p / "bin" / ("quantize" + binary_ext)
 
     print(f"Attempting to execute {quantize}")
 
