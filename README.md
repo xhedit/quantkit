@@ -23,6 +23,7 @@ Commands:
   safetensor  Download and/or convert a pytorch model to safetensor format.
   awq         Download and/or convert a model to AWQ format.
   exl2        Download and/or convert a model to EXL2 format.
+  gguf        Download and/or convert a model to GGUF format.
   gptq        Download and/or convert a model to GPTQ format.
 ```
 
@@ -34,6 +35,7 @@ The download command defaults to downloading into the HF cache and producing sym
 AWQ defaults to 4 bits, group size 128, zero-point True. <br />
 GPTQ defaults are 4 bits, group size 128, activation-order False. <br />
 EXL2 defaults to 8 head bits but there is no default bitrate. <br />
+GGUF defaults to no imatrix but there is no default quant-type. <br/>
 
 # Examples
 
@@ -56,6 +58,22 @@ quantkit download mistralai/Mistral-7B-v0.1 --no-cache --safetensors-only -out m
 Download and convert a model to safetensor, deleting the original pytorch bins:
 ```
 quantkit safetensor migtissera/Tess-10.7B-v1.5b --delete-original
+```
+
+<br/>
+
+
+Download and convert a model to GGUF (Q5_K):
+```
+quantkit gguf TinyLlama/TinyLlama-1.1B-Chat-v1.0 -out TinyLlama-1.1B Q5_K
+```
+
+<br/>
+
+
+Download and convert a model to GGUF using an imatrix, offloading 200 layers:
+```
+quantkit gguf TinyLlama/TinyLlama-1.1B-Chat-v1.0 -out TinyLlama-1.1B IQ4_XS --built-in-imatrix -ngl 200
 ```
 
 <br/>
@@ -84,4 +102,4 @@ quantkit exl2 mistralai/Mistral-7B-v0.1 -out Mistral-7B-v0.1-exl2-b8-h8 -b 8 -hb
 <br/>
 
 
-Still in beta.
+Still in beta. Llama.cpp offloading is probably not going to work on your platform unless you uninstall llama-cpp-conv and reinstall it with the proper build flags. Look at the llama-cpp-python documentation.
