@@ -41,7 +41,7 @@ def safetensor(model, delete_original):
 @click.option('--cal-file', help='Specify calibration dataset')
 @click.option('--n-gpu-layers', "-ngl",  default=0, help='how many layers to offload to GPU for imatrix')
 def gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, cal_file, n_gpu_layers):
-   """Download and convert a model to GGUF format."""
+   """Download and/or convert a model to GGUF format."""
    click.echo(f"gguf | model: {model} | quant_type: {quant_type} | out: {output} | keep: {keep} | f32: {f32} | bim: {built_in_imatrix} | imatrix: {imatrix} | cal_file: {cal_file} | ngl: {n_gpu_layers}")
    run_gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, cal_file, int(n_gpu_layers))
 

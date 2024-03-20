@@ -95,14 +95,17 @@ def run_gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, ca
 def run_imatrix(cal_file, n_gpu_layers):
     import site
     import shlex
+    import platform
     import subprocess
 
+    binary_ext = ".exe" if platform.system() is "Windows" else ""
+
     site_dir = site.getusersitepackages()
-    imatrix = Path(site_dir) / "bin" / "imatrix"
+    imatrix = Path(site_dir) / "bin" / ("imatrix" + binary_ext)
 
     if not imatrix.is_file():
         for d in site.getsitepackages():
-            if(Path(d) / "bin" / "imatrix").is_file():
+            if(Path(d) / "bin" / ("imatrix" + binary_ext)).is_file():
                 site_dir = d
                 imatrix = d / "bin" / "imatrix"
 
@@ -129,14 +132,17 @@ def quantize(gguf_file, output, quant_type, imatrix):
 
     import site
     import shlex
+    import platform
     import subprocess
 
+    binary_ext = ".exe" if platform.system() is "Windows" else ""
+
     site_dir = site.getusersitepackages()
-    quantize = Path(site_dir) / "bin" / "quantize"
+    quantize = Path(site_dir) / "bin" / ("quantize" + binary_ext)
 
     if not quantize.is_file():
         for d in site.getsitepackages():
-            if(Path(d) / "bin" / "quantize").is_file():
+            if(Path(d) / "bin" / ("quantize" + binary_ext)).is_file():
                 site_dir = d
                 quantize = d / "bin" / "quantize"
 
