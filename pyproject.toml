@@ -21,7 +21,8 @@ dependencies = [
     "autoawq",
     "exl2conv",
     "llama-cpp-conv",
-    "sentencepiece"
+    "sentencepiece",
+    "hqq",
 ]
 
 [project.optional-dependencies]
