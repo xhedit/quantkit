@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import click
-from quantkit.quantkit import run_download, run_safetensor, run_gguf, run_awq, run_gptq, run_exl2
+from quantkit.quantkit import run_download, run_safetensor, run_gguf, run_awq, run_gptq, run_exl2, run_hqq
 
 # commands: download, safetensor, gguf, awq, gptq, exl2
 
@@ -92,12 +92,29 @@ def exl2(model, output, hf_cache, bits, head_bits, rope_alpha, rope_scale, only_
     click.echo(f"exl2 | model: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | head_bits: {head_bits} | rope_alpha: {rope_alpha} | rope_scale: {rope_scale} | only_measurement: {only_measurement} | no_resume: {no_resume}")
     run_exl2(model, output, hf_cache, bits, int(head_bits), rope_alpha, rope_scale, only_measurement, no_resume)
 
+@run.command()
+@click.argument('model', required=True)
+@click.option('--output', '-out', help='output directory')
+@click.option('--hf-cache/--no-cache', default=True, help='Use huggingface cache dir.')
+@click.option('--bits', '-b', default=4, help='Bits / bpw')
+@click.option('--group-size', default=64, help='Group size')
+@click.option('--zero-point/--no-zero-point', default=True, help='quantize the zero point to 8bit')
+@click.option('--scale/--no-scale', default=False, help='quantize scaling factor to 8bit gs128')
+@click.option('--offload-meta/--no-offload-meta', default=False, help='offload metadata to CPU for lower VRAM reqs')
+@click.option('--view-as-float/--no-view-as-float', default=False, help='quantized parameters viewed as float, not ints')
+def hqq(model, output, hf_cache, bits, group_size, zero_point, scale, offload_meta, view_as_float):
+    """Download and/or convert a model to HQQ format."""
+    click.echo(f"hqqq | model: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | group_size: {group_size} | zero_point: {zero_point} | scale: {scale} | offload_meta: {offload_meta} | view_as_float: {view_as_float}")
+    run_hqq(model, output, hf_cache, bits, group_size, zero_point, scale, offload_meta, view_as_float)
+
+
 run.add_command(download)
 run.add_command(safetensor)
-#run.add_command(gguf)
+run.add_command(gguf)
 run.add_command(awq)
 run.add_command(gptq)
 run.add_command(exl2)
+run.add_command(hqq)
 
 def main():
     run()

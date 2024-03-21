@@ -182,10 +182,8 @@ def run_awq(model, output, hf_cache, bits, group_size, zero_point, gemm):
     from awq import AutoAWQForCausalLM
     from transformers import AutoTokenizer
 
-    model_path = model_dir
-
     if output is None:
-        output = f"{model_path}-awq-w{bits}-gs{group_size}"
+        output = f"{model_dir}-awq-w{bits}-gs{group_size}"
 
     quant_path = output
     quant_config = { "zero_point": zero_point, "q_group_size": group_size, "w_bit": bits, "version": "GEMM" }
@@ -196,8 +194,8 @@ def run_awq(model, output, hf_cache, bits, group_size, zero_point, gemm):
     print(f"Starting awq quantization for {quant_path} at {str(dt_start)}")
     start = time.perf_counter()
 
-    model = AutoAWQForCausalLM.from_pretrained(model_path)
-    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=False)
+    model = AutoAWQForCausalLM.from_pretrained(model_dir)
+    tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=False)
 
     model.quantize(tokenizer, quant_config=quant_config)
 
@@ -241,22 +239,20 @@ def run_gptq(model, output, hf_cache, bits, group_size, damp, sym, true_seq, act
         true_sequential=true_seq
     )
 
-    model_path = model_dir
-
     if output is None:
         output = f"{model_dir}-gptq-w{bits}-gs{group_size}{'-ao' if act_order else ''}"
 
     quant_path = output
 
     # gptq needs post-training, use wikitext2
-    traindataset, testenc = get_wikitext2(128, 0, 4096, model_path)
+    traindataset, testenc = get_wikitext2(128, 0, 4096, model_dir)
 
     dt_start = datetime.datetime.now()
     print(f"Starting gptq quantization for {quant_path} at {str(dt_start)}")
     start = time.perf_counter()
 
-    model = AutoGPTQForCausalLM.from_pretrained(model_path, quant_options, torch_dtype="auto", low_cpu_mem_usage=True)
-    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=False)
+    model = AutoGPTQForCausalLM.from_pretrained(model_dir, quant_options, torch_dtype="auto", low_cpu_mem_usage=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=False)
 
     model.quantize(traindataset, use_triton=False, batch_size=1, cache_examples_on_gpu=False)
 
@@ -351,6 +347,53 @@ def run_exl2(model, output, hf_cache, bits, head_bits, rope_alpha, rope_scale, o
         job["no_resume"] = True
         convert_hf_to_exl2(job)
 
+    gc.collect()
+    torch.cuda.empty_cache()
+
+    end = time.perf_counter()
+    dt_pq = datetime.datetime.now()
+    print(f"Quantization complete ({str(end-start)} seconds) at {str(dt_pq)}")
+
+def run_hqq(model, output, hf_cache, bits, group_size, zero_point, scale, offload_meta, view_as_float):
+    path = Path(model)
+    if path.is_dir():
+        if Path(path / "config.json").is_file():
+            model_dir = path
+        else:
+            click.echo("no config.json found in model dir")
+            return
+    else:
+        model_dir = model.split("/")[1]
+        path = Path(model_dir)
+
+        from huggingface_hub import snapshot_download
+        snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
+
+    import torch
+    from hqq.engine.hf import HQQModelForCausalLM, AutoTokenizer
+    from hqq.core.quantize import BaseQuantizeConfig
+
+    if output is None:
+        output = f"{model_dir}-hqq-w{bits}-gs{group_size}"
+
+    quant_path = output
+
+    dt_start = datetime.datetime.now()
+    print(f"Starting hqq quantization for {quant_path} at {str(dt_start)}")
+    start = time.perf_counter()
+
+    model = HQQModelForCausalLM.from_pretrained(model_dir, torch_dtype="auto")
+    tokenizer = AutoTokenizer.from_pretrained(model_dir)
+
+    quant_config = BaseQuantizeConfig(nbits=bits, group_size=group_size)
+    model.quantize_model(quant_config=quant_config)
+
+    HQQModelForCausalLM.save_quantized_(model, save_dir=quant_path)
+    tokenizer.save_pretrained(quant_path)
+
+    # free GPU mem
+    del model
+    del tokenizer
     gc.collect()
     torch.cuda.empty_cache()
 
