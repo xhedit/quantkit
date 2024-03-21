@@ -10,6 +10,13 @@ pip3 install llm-quantkit
 ```
 <br/>
 
+# Requirements
+This project depends on torch, awq, exl2, gptq, and hqq libraries, some of which are not compatible with Python 3.12. <br/>
+If you need a device specific torch, install it first. <br/>
+Python: 3.8, 3.9, 3.10, and 3.11
+
+
+
 # Usage
 
 ```
@@ -25,6 +32,7 @@ Commands:
   exl2        Download and/or convert a model to EXL2 format.
   gguf        Download and/or convert a model to GGUF format.
   gptq        Download and/or convert a model to GPTQ format.
+  hqq         Download and/or convert a model to HQQ format.
 ```
 
 The first argument after command should be an HF repo id (mistralai/Mistral-7B-v0.1) or a local directory with model files in it already.
@@ -102,4 +110,10 @@ quantkit exl2 mistralai/Mistral-7B-v0.1 -out Mistral-7B-v0.1-exl2-b8-h8 -b 8 -hb
 <br/>
 
 
-Still in beta. Llama.cpp offloading is probably not going to work on your platform unless you uninstall llama-cpp-conv and reinstall it with the proper build flags. Look at the llama-cpp-python documentation.
+Convert a model to HQQ:
+```
+quantkit hqq mistralai/Mistral-7B-v0.1 -out Mistral-7B-HQQ-w4-gs64
+```
+<br/>
+
+Still in beta. Llama.cpp offloading is probably not going to work on your platform unless you uninstall llama-cpp-conv and reinstall it with the proper build flags. Look at the llama-cpp-python documentation and follow the revelant command but replace llama-cpp-python with llama-cpp-conv.
