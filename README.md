@@ -11,10 +11,12 @@ pip3 install llm-quantkit
 <br/>
 
 # Requirements
+
 This project depends on torch, awq, exl2, gptq, and hqq libraries, some of which are not compatible with Python 3.12. <br/>
 If you need a device specific torch, install it first. <br/>
 Python: 3.8, 3.9, 3.10, and 3.11
 
+<br/>
 
 
 # Usage
@@ -43,7 +45,10 @@ The download command defaults to downloading into the HF cache and producing sym
 AWQ defaults to 4 bits, group size 128, zero-point True. <br />
 GPTQ defaults are 4 bits, group size 128, activation-order False. <br />
 EXL2 defaults to 8 head bits but there is no default bitrate. <br />
-GGUF defaults to no imatrix but there is no default quant-type. <br/>
+GGUF defaults to no imatrix but there is no default quant-type. <br />
+HQQ defaults to 4 bits, group size 64, zero_point=True. <br />
+
+<br/>
 
 # Examples
 
@@ -115,5 +120,36 @@ Convert a model to HQQ:
 quantkit hqq mistralai/Mistral-7B-v0.1 -out Mistral-7B-HQQ-w4-gs64
 ```
 <br/>
+
+# Hardware Requirements
+Here's what has worked for me in testing. Drop a PR or Issue with updates for what is possible on various size cards. <br />
+GGUF conversion doesn't need a GPU except for iMatrix and Exllamav2 requires that the largest layer fits on single GPU.
+
+|Model Size|Quant|VRAM|Successful|
+|--|--|--|--|
+|7B|AWQ|24GB|✅|
+|7B|EXL2|24GB|✅|
+|7B|GGUF|24GB|✅|
+|7B|GPTQ|24GB|✅|
+|7B|HQQ|24GB|✅|
+|13B|AWQ|24GB|✅|
+|13B|EXL2|24GB|✅|
+|13B|GGUF|24GB|✅|
+|13B|GPTQ|24GB|:x:|
+|13B|HQQ|24GB|?|
+|34B|AWQ|24GB|:x:|
+|34B|EXL2|24GB|✅|
+|34B|GGUF|24GB|✅|
+|34B|GPTQ|24GB|:x:|
+|34B|HQQ|24GB|?|
+|70B|AWQ|24GB|:x:|
+|70B|EXL2|24GB|✅|
+|70B|GGUF|24GB|✅|
+|70B|GPTQ|24GB|:x:|
+|70B|HQQ|24GB|?|
+
+<br />
+
+# Notes
 
 Still in beta. Llama.cpp offloading is probably not going to work on your platform unless you uninstall llama-cpp-conv and reinstall it with the proper build flags. Look at the llama-cpp-python documentation and follow the revelant command but replace llama-cpp-python with llama-cpp-conv.
