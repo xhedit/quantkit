@@ -5,7 +5,7 @@ A tool for downloading and converting HuggingFace models without drama.
 <br/>
 
 # Install
-If you're on a machine with CUDA and want AWQ/GPTQ support:
+If you're on a machine with an NVIDIA/CUDA GPU and want AWQ/GPTQ support:
 ```
 pip3 install llm-quantkit[cuda]
 ```
