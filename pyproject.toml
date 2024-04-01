@@ -17,8 +17,6 @@ dependencies = [
     "transformers",
     "huggingface_hub",
     "safetensors",
-    "auto-gptq",
-    "autoawq",
     "exl2conv",
     "llama-cpp-conv",
     "sentencepiece",
@@ -26,7 +24,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = []
+cuda = [
+    "auto-gptq",
+    "autoawq",
+]
 
 [project.urls]
 repository = "https://github.com/xhedit/quantkit"
