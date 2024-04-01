@@ -20,11 +20,11 @@ pip3 install llm-quantkit
 
 # Requirements
 
-This project depends on torch, awq, exl2, gptq, and hqq libraries, some of which are not compatible with Python 3.12. <br/>
 If you need a device specific torch, install it first. <br/>
-Python: 3.8, 3.9, 3.10, and 3.11
 
-<br/>
+This project depends on torch, awq, exl2, gptq, and hqq libraries. <br/>
+Some of these dependencies do not support Python 3.12 yet. <br/>
+Supported Pythons: 3.8, 3.9, 3.10, and 3.11<br/>
 
 
 # Usage
