@@ -19,7 +19,7 @@ def run_download(model, output, hf_cache, force_download, resume_download, safet
         path = Path(output)
 
     from huggingface_hub import snapshot_download
-    snapshot_download(model, local_dir=path, local_dir_use_symlinks=hf_cache, force_download=force_download, resume_download=resume_download, ignore_patterns='pytorch_model*' if safetensors_only else None)
+    snapshot_download(model, local_dir=path, local_dir_use_symlinks=hf_cache, force_download=force_download, resume_download=resume_download, ignore_patterns=['pytorch_model*', 'consolidated*.pt'] if safetensors_only else None)
 
 def run_safetensor(model, delete_original):
     path = Path(model)
