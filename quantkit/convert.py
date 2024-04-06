@@ -1413,7 +1413,7 @@ def do_gguf_conversion(model: str, output: str, out_type: str, vocab_dir: str, v
     print(f"Special vocab info: {special_vocab}")
 
     model   = model_plus.model
-    model   = convert_model_names(model, params, False) #skip_unknown
+    model   = convert_model_names(model, params, True) #skip_unknown
     ftype   = pick_output_type(model, out_type)
     model   = convert_to_output_type(model, ftype)
     outfile = output or default_outfile(model_plus.paths, ftype)
