@@ -160,4 +160,4 @@ GGUF conversion doesn't need a GPU except for iMatrix and Exllamav2 requires tha
 
 # Notes
 
-Still in beta. Llama.cpp offloading is probably not going to work on your platform unless you uninstall llama-cpp-conv and reinstall it with the proper build flags. Look at the llama-cpp-python documentation and follow the revelant command but replace llama-cpp-python with llama-cpp-conv.
+Still in beta. Llama.cpp offloading is probably not going to work on your platform unless you uninstall llama-cpp-conv and reinstall it with the proper build flags. Look at the llama-cpp-python documentation and follow the relevant command but replace llama-cpp-python with llama-cpp-conv.
