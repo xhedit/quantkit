@@ -16,10 +16,11 @@ def run():
 @click.option('--force-download/--no-force-download', default=False, help='Download again even if model is in hf cache.')
 @click.option('--resume/--no-resume', default=True, help='Resume a previously incomplete download.')
 @click.option('--safetensors-only/--everything', default=False, help='Ignore pytorch model-*.bin and pytorch_model.bin.index.json')
-def download(model, output, hf_cache, force_download, resume, safetensors_only):
+@click.option('--branch', '--revision', default=None, help='Branch/revision of hf repo to download')
+def download(model, output, hf_cache, force_download, resume, safetensors_only, branch):
     """Download model from huggingface."""
-    click.echo(f"download | model: {model} | use hf cache: {hf_cache} | out: {output} | force_download: {force_download} | resume: {resume} | safetensors_only: {safetensors_only}")
-    run_download(model, output, hf_cache, force_download, resume, safetensors_only)
+    click.echo(f"download | model: {model} | use hf cache: {hf_cache} | out: {output} | force_download: {force_download} | resume: {resume} | safetensors_only: {safetensors_only} | branch: {branch}")
+    run_download(model, output, hf_cache, force_download, resume, safetensors_only, branch)
 
 @run.command()
 @click.argument('model', required=True)
