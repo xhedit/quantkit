@@ -76,6 +76,14 @@ quantkit download mistralai/Mistral-7B-v0.1 --no-cache --safetensors-only -out m
 <br/>
 
 
+Download from specific revision of a huggingface repo:
+```
+uantkit download turboderp/TinyLlama-1B-32k-exl2 --branch 6.0bpw --no-cache -out TinyLlama-1B-32k-exl2-b6
+```
+
+<br/>
+
+
 Download and convert a model to safetensor, deleting the original pytorch bins:
 ```
 quantkit safetensor migtissera/Tess-10.7B-v1.5b --delete-original
