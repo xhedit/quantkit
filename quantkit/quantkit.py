@@ -74,7 +74,7 @@ def run_gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, ca
     # fix vocab here
 
     if output is None:
-        output = model_dir + "_" + (step_two.upper() or quant_type.upper()) + ".gguf"
+        output = str(model_dir) + "_" + (step_two.upper() or quant_type.upper()) + ".gguf"
 
     #def do_gguf_conversion(model: str, output: str, out_type: str, vocab_dir: str, vocab_type: str, context: int, pad_vocab: bool, concurrency: bool, big_endian: bool) -> None:
     if do_step_two:
