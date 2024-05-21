@@ -10,6 +10,7 @@ import datetime
 from pathlib import Path
 from quantkit.safetensor import convert_multi
 from quantkit.convert import do_gguf_conversion
+from quantkit.convert_hf import do_gguf_conversion as do_gguf_conversion_hf
 
 def run_download(model, output, hf_cache, force_download, resume_download, safetensors_only, branch):
     if output is None:
@@ -43,6 +44,7 @@ def run_gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, ca
             print(f"quantkit: could not load {cal_file}")
             return
 
+    bf16 = False
     path = Path(model)
     if path.is_dir():
         if Path(path / "config.json").is_file():
@@ -58,9 +60,15 @@ def run_gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, ca
         snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
 
     do_step_two = False
+    import json
+    with open(path / "config.json") as f:
+        config = json.load(f)
+        if 'torch_dtype' in config:
+            if config['torch_dtype'] == 'bfloat16':
+                bf16 = True
 
     #if lower(quant_type) not in ["F32", "F16", "Q8_0"]:
-    if quant_type.lower() not in [x.lower() for x in ["F32", "F16", "Q8_0"]]:
+    if quant_type.lower() not in [x.lower() for x in ["F32", "F16", "BF16", "Q8_0"]]:
         # two step
         if quant_type.lower() not in [x.lower() for x in ["Q4_0", "Q4_1", "Q5_0", "Q5_1", "Q8_0", "Q8_1", "Q2_K", "IQ3_XS",
                                                           "Q3_K", "Q4_K", "Q5_K", "Q6_K", "Q8_K", "IQ2_XXS", "IQ2_XS", "IQ3_XXS",
@@ -69,23 +77,27 @@ def run_gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, ca
             raise ValueError("quant_type must be a valid gguf quant type")
         step_two = quant_type
         do_step_two = True
-        quant_type = "F32" if f32 else "F16"
+        quant_type = "F32" if f32 else "BF16" if bf16 else "F16"
 
     # fix vocab here
+    if Path(path / "tokenizer.model").is_file():
+        vocab_type = "spm,hfft"
+    else:
+        vocab_type = "bpe"
 
     if output is None:
         output = str(model_dir) + "_" + (step_two.upper() or quant_type.upper()) + ".gguf"
 
     #def do_gguf_conversion(model: str, output: str, out_type: str, vocab_dir: str, vocab_type: str, context: int, pad_vocab: bool, concurrency: bool, big_endian: bool) -> None:
     if do_step_two:
-        do_gguf_conversion(Path(model_dir), "tmp.gguf", quant_type.lower(), None, "spm,hfft", -1, False, False, False)
+        do_gguf_conversion_hf(Path(model_dir), "tmp.gguf", quant_type.lower(), None, vocab_type, -1, False, False, False)
 
         if built_in_imatrix or (imatrix is None and cal_file is not None):
             imatrix = run_imatrix(cal_file, n_gpu_layers)
 
         quantize("tmp.gguf", output, step_two, imatrix)
     else:
-        do_gguf_conversion(Path(model_dir), output, quant_type.lower(), None, "spm,hfft", -1, False, False, False)
+        do_gguf_conversion_hf(Path(model_dir), output, quant_type.lower(), None, vocab_type, -1, False, False, False)
 
     if not keep:
         os.remove("tmp.gguf")
