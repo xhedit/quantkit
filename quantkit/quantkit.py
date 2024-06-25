@@ -1,11 +1,14 @@
 # quantkit can download a hf model, convert a model to safetensors, and quantize
-# supports: AWQ, GPTQ, and EXL2
+# supports: GGUF, APT, GPTQ, EXL2, and HQQ
 
 import gc
 import os
+import json
 import site
 import time
 import datetime
+
+from huggingface_hub import snapshot_download
 
 from pathlib import Path
 from quantkit.safetensor import convert_multi
@@ -19,7 +22,6 @@ def run_download(model, output, hf_cache, force_download, resume_download, safet
     else:
         path = Path(output)
 
-    from huggingface_hub import snapshot_download
     snapshot_download(model, revision=branch, local_dir=path, local_dir_use_symlinks=hf_cache, force_download=force_download, resume_download=resume_download, ignore_patterns=['pytorch_model*', 'consolidated*.pt'] if safetensors_only else None)
 
 def run_safetensor(model, delete_original):
@@ -34,7 +36,6 @@ def run_safetensor(model, delete_original):
         model_dir = model.split("/")[1]
         path = Path(model_dir)
 
-        from huggingface_hub import snapshot_download
         snapshot_download(model, local_dir=path, local_dir_use_symlinks=False, resume_download=True)
         convert_multi(model_dir, del_pytorch_model=delete_original)
 
@@ -56,11 +57,9 @@ def run_gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, ca
         model_dir = model.split("/")[1]
         path = Path(model_dir)
 
-        from huggingface_hub import snapshot_download
         snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
 
     do_step_two = False
-    import json
     with open(path / "config.json") as f:
         config = json.load(f)
         if 'torch_dtype' in config:
@@ -187,7 +186,6 @@ def run_awq(model, output, hf_cache, bits, group_size, zero_point, gemm):
         model_dir = model.split("/")[1]
         path = Path(model_dir)
 
-        from huggingface_hub import snapshot_download
         snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
 
     import torch
@@ -236,7 +234,6 @@ def run_gptq(model, output, hf_cache, bits, group_size, damp, sym, true_seq, act
         model_dir = model.split("/")[1]
         path = Path(model_dir)
 
-        from huggingface_hub import snapshot_download
         snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
 
     import torch
@@ -293,15 +290,13 @@ def run_exl2(model, output, hf_cache, bits, head_bits, rope_alpha, rope_scale, o
         model_dir = model.split("/")[1]
         path = Path(model_dir)
 
-        from huggingface_hub import snapshot_download
         snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
 
         if not Path(path / "model.safetensors").is_file() and not Path(path / "model.safetensors.index.json").is_file():
             convert_multi(model_dir, del_pytorch_model=True)
 
     import torch
-    from exl2conv.conversion.qparams import qparams_headoptions
-    from exl2conv.conversion.convert import convert_hf_to_exl2
+    from quantkit.convert_exl2 import convert_hf_to_exl2
 
     if output is None:
         compile_full = model_dir + "-exl2"
@@ -336,6 +331,8 @@ def run_exl2(model, output, hf_cache, bits, head_bits, rope_alpha, rope_scale, o
         "compile_full": compile_full,
         "no_resume": no_resume,
         "output_measurement": output_measurement,
+        "status_output": True,
+        "hidden_state_offload_layers": 0,
     }
 
     if rope_alpha is not None:
@@ -378,7 +375,6 @@ def run_hqq(model, output, hf_cache, bits, group_size, zero_point, scale, offloa
         model_dir = model.split("/")[1]
         path = Path(model_dir)
 
-        from huggingface_hub import snapshot_download
         snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
 
     import torch
