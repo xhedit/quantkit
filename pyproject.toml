@@ -7,7 +7,7 @@ name = "llm-quantkit"
 description = "cli tool for downloading and quantizing LLMs"
 readme = "README.md"
 license = { text = "MIT License" }
-version = "0.27"
+version = "0.29"
 authors = [{ name = "xhedit", email = "jevd@protonmail.com" }]
 dependencies = [
     "click",
@@ -17,7 +17,7 @@ dependencies = [
     "transformers",
     "huggingface_hub",
     "safetensors",
-    "exl2conv",
+    "exllamav2",
     "llama-cpp-conv",
     "sentencepiece",
     "hqq",
