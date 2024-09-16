@@ -69,10 +69,20 @@ def run_gguf(model, quant_type, output, keep, f32, built_in_imatrix, imatrix, ca
     #if lower(quant_type) not in ["F32", "F16", "Q8_0"]:
     if quant_type.lower() not in [x.lower() for x in ["F32", "F16", "BF16", "Q8_0"]]:
         # two step
-        if quant_type.lower() not in [x.lower() for x in ["Q4_0", "Q4_1", "Q5_0", "Q5_1", "Q8_0", "Q8_1", "Q2_K", "IQ3_XS",
-                                                          "Q3_K", "Q4_K", "Q5_K", "Q6_K", "Q8_K", "IQ2_XXS", "IQ2_XS", "IQ3_XXS",
-                                                          "Q2_K_S", "Q3_K_S", "Q3_K_M", "Q3_K_L", "Q4_K_S", "Q4_K_M", "Q5_K_S", "Q5_K_M",
-                                                          "IQ1_S", "IQ4_NL", "IQ3_S", "IQ2_S", "IQ4_XS", "IQ2_M", "IQ3_M"] ]:
+        if quant_type.lower() not in [x.lower() for x in ["Q4_0", "Q4_1", "Q5_0", "Q5_1",
+                                                          "IQ2_XXS", "IQ2_XS", "IQ2_S", "IQ2_M",
+                                                          "IQ1_S", "IQ1_M", "TQ1_0", "TQ2_0",
+                                                          "Q2_K", "Q2_K_S", "IQ3_XXS", "IQ3_S",
+                                                          "IQ3_M", "Q3_K", "IQ3_XS", "Q3_K_S",
+                                                          "Q3_K_M", "Q3_K_L", "IQ4_NL", "IQ4_XS",
+                                                          "Q4_K", "Q4_K_M", "Q5_K", "Q5_K_S",
+                                                          "Q5_K_M", "Q6_K", "Q8_0", 
+                                                          "Q4_0_4_4", "Q4_0_4_8", "Q4_0_8_8"] ]:
+                                                          
+                                                          # "Q8_0", "Q8_1", "Q2_K", "IQ3_XS",
+                                                          # "Q3_K", "Q4_K", "Q5_K", "Q6_K", "Q8_K", , "IQ2_XS", "IQ3_XXS",
+                                                          # "Q2_K_S", "Q3_K_S", "Q3_K_M", "Q3_K_L", "Q4_K_S", "Q4_K_M", "Q5_K_S", "Q5_K_M",
+                                                          # "IQ1_S", "IQ4_NL", "IQ3_S", "IQ2_S", "IQ4_XS", "IQ2_M", "IQ3_M"] ]:
             raise ValueError("quant_type must be a valid gguf quant type")
         step_two = quant_type
         do_step_two = True
