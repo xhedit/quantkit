@@ -112,14 +112,14 @@ def run_imatrix(cal_file, n_gpu_layers):
     binary_ext = ".exe" if platform.system() == "Windows" else ""
 
     site_dir = site.getusersitepackages()
-    imatrix = Path(site_dir) / "bin" / ("imatrix" + binary_ext)
+    imatrix = Path(site_dir) / "bin" / ("llama-imatrix" + binary_ext)
 
     if not imatrix.is_file():
         for d in site.getsitepackages():
             p = Path(d)
-            if(p / "bin" / ("imatrix" + binary_ext)).is_file():
+            if(p / "bin" / ("llama-imatrix" + binary_ext)).is_file():
                 site_dir = p
-                imatrix = p / "bin" / ("imatrix" + binary_ext)
+                imatrix = p / "bin" / ("llama-imatrix" + binary_ext)
 
     print(f"Path to binary is: {imatrix}")
 
@@ -152,14 +152,14 @@ def quantize(gguf_file, output, quant_type, imatrix):
     binary_ext = ".exe" if platform.system() == "Windows" else ""
 
     site_dir = site.getusersitepackages()
-    quantize = Path(site_dir) / "bin" / ("quantize" + binary_ext)
+    quantize = Path(site_dir) / "bin" / ("llama-quantize" + binary_ext)
 
     if not quantize.is_file():
         for d in site.getsitepackages():
             p = Path(d)
-            if(p / "bin" / ("quantize" + binary_ext)).is_file():
+            if(p / "bin" / ("llama-quantize" + binary_ext)).is_file():
                 site_dir = p
-                quantize = p / "bin" / ("quantize" + binary_ext)
+                quantize = p / "bin" / ("llama-quantize" + binary_ext)
 
     print(f"Path to binary is: {quantize}")
 
