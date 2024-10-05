@@ -36,7 +36,6 @@ def convert_file(pt_filename: str, sf_filename: str):
             loaded.pop(name)
 
     # For tensors to be contiguous
-    #loaded = {k: v.contiguous().half() for k, v in loaded.items()}
     loaded = {k: v.contiguous() for k, v in loaded.items()}
 
     dirname = os.path.dirname(sf_filename)
@@ -67,6 +66,7 @@ def convert_multi(folder: str, del_pytorch_model: bool):
     if not os.path.exists(os.path.join(folder, filename)):
         if os.path.exists(os.path.join(folder, "pytorch_model.bin")):
             convert_single(folder, del_pytorch_model)
+            return
         if os.path.exists(os.path.join(folder, "adapter_model.bin")):
             convert_single(folder, del_pytorch_model)
             return
