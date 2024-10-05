@@ -36,7 +36,8 @@ def convert_file(pt_filename: str, sf_filename: str):
             loaded.pop(name)
 
     # For tensors to be contiguous
-    loaded = {k: v.contiguous().half() for k, v in loaded.items()}
+    #loaded = {k: v.contiguous().half() for k, v in loaded.items()}
+    loaded = {k: v.contiguous() for k, v in loaded.items()}
 
     dirname = os.path.dirname(sf_filename)
     os.makedirs(dirname, exist_ok=True)
@@ -66,6 +67,9 @@ def convert_multi(folder: str, del_pytorch_model: bool):
     if not os.path.exists(os.path.join(folder, filename)):
         if os.path.exists(os.path.join(folder, "pytorch_model.bin")):
             convert_single(folder, del_pytorch_model)
+        if os.path.exists(os.path.join(folder, "adapter_model.bin")):
+            convert_single(folder, del_pytorch_model)
+            return
 
     with open(os.path.join(folder, filename), "r") as f:
         data = json.load(f)
@@ -101,7 +105,11 @@ def convert_multi(folder: str, del_pytorch_model: bool):
 
 def convert_single(folder: str, del_pytorch_model: bool):
     pt_filename = "pytorch_model.bin"
-    st_name = "model.safetensors"
+    if not os.path.exists(os.path.join(folder, pt_filename)):
+        pt_filename = "adapter_model.bin"
+        st_name = "adapter_model.safetensors"
+    else:
+        st_name = "model.safetensors"
     st_filename = os.path.join(folder, st_name)
     convert_file(pt_filename, st_filename)
     if del_pytorch_model:
