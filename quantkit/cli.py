@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import click
-from quantkit.quantkit import run_download, run_safetensor, run_gguf, run_awq, run_gptq, run_exl2, run_hqq
+from quantkit.quantkit import run_download, run_safetensor, run_gguf, run_awq, run_gptq, run_exl2, run_hqq, run_compressor
 
 # commands: download, safetensor, gguf, awq, gptq, exl2
 
@@ -108,6 +108,17 @@ def hqq(model, output, hf_cache, bits, group_size, zero_point, scale, offload_me
     click.echo(f"hqqq | model: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | group_size: {group_size} | zero_point: {zero_point} | scale: {scale} | offload_meta: {offload_meta} | view_as_float: {view_as_float}")
     run_hqq(model, output, hf_cache, bits, group_size, zero_point, scale, offload_meta, view_as_float)
 
+@run.command()
+@click.argument('model', required=True)
+@click.option('--output', '-out', help='output directory')
+@click.option('--hf-cache/--no-cache', default=True, help='Use huggingface cache dir.')
+@click.option('--quantization', '-q', default="int8", help='Quantization: int8, fp8, int4')
+@click.option('--device-map', '-d', default="cuda", help='value for hf device_map (default: cuda)')
+def compressor(model, output, hf_cache, quantization, device_map):
+    """Download and/or convert a model with llm-compressor."""
+    click.echo(f"hqqq | model: {model} | out: {output} | use hf cache: {hf_cache} | quantization: {quantization} | device_map {device_map}")
+    run_compressor(model, output, hf_cache, quantization, device_map)
+
 
 run.add_command(download)
 run.add_command(safetensor)
@@ -116,6 +127,7 @@ run.add_command(awq)
 run.add_command(gptq)
 run.add_command(exl2)
 run.add_command(hqq)
+run.add_command(compressor)
 
 def main():
     run()
