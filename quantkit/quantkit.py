@@ -429,6 +429,7 @@ def run_compressor(model, output, hf_cache, quantization, device_map):
 
         snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
 
+    import torch
     from transformers import AutoTokenizer, AutoModelForCausalLM
 
     model = AutoModelForCausalLM.from_pretrained(
