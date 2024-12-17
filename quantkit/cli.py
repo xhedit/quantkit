@@ -105,7 +105,7 @@ def exl2(model, output, hf_cache, bits, head_bits, rope_alpha, rope_scale, only_
 @click.option('--view-as-float/--no-view-as-float', default=False, help='quantized parameters viewed as float, not ints')
 def hqq(model, output, hf_cache, bits, group_size, zero_point, scale, offload_meta, view_as_float):
     """Download and/or convert a model to HQQ format."""
-    click.echo(f"hqqq | model: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | group_size: {group_size} | zero_point: {zero_point} | scale: {scale} | offload_meta: {offload_meta} | view_as_float: {view_as_float}")
+    click.echo(f"hqq | model: {model} | out: {output} | use hf cache: {hf_cache} | bits: {bits} | group_size: {group_size} | zero_point: {zero_point} | scale: {scale} | offload_meta: {offload_meta} | view_as_float: {view_as_float}")
     run_hqq(model, output, hf_cache, bits, group_size, zero_point, scale, offload_meta, view_as_float)
 
 @run.command()
@@ -116,7 +116,7 @@ def hqq(model, output, hf_cache, bits, group_size, zero_point, scale, offload_me
 @click.option('--device-map', '-d', default="cuda", help='value for hf device_map (default: cuda)')
 def compressor(model, output, hf_cache, quantization, device_map):
     """Download and/or convert a model with llm-compressor."""
-    click.echo(f"hqqq | model: {model} | out: {output} | use hf cache: {hf_cache} | quantization: {quantization} | device_map {device_map}")
+    click.echo(f"compressor | model: {model} | out: {output} | use hf cache: {hf_cache} | quantization: {quantization} | device_map {device_map}")
     run_compressor(model, output, hf_cache, quantization, device_map)
 
 
