@@ -473,6 +473,7 @@ def run_compressor(model, output, hf_cache, quantization, device_map):
     from llmcompressor.transformers import oneshot
 
     if quantization.lower() == "fp8":
+        from llmcompressor.modifiers.quantization import QuantizationModifier
         recipe = QuantizationModifier(targets="Linear", scheme="FP8_DYNAMIC", ignore=["re:.*lm_head", "re:multi_modal_projector.*", "re:vision_model.*", "re:visual.*"])
     elif quantization.lower() == "int8":
         from llmcompressor.modifiers.quantization import GPTQModifier
