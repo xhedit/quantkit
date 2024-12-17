@@ -43,6 +43,7 @@ Commands:
   gguf        Download and/or convert a model to GGUF format.
   gptq        Download and/or convert a model to GPTQ format.
   hqq         Download and/or convert a model to HQQ format.
+  compressor  Download and/or convert a model with llm-compressor.
 ```
 
 The first argument after command should be an HF repo id (mistralai/Mistral-7B-v0.1) or a local directory with model files in it already.
@@ -55,6 +56,7 @@ GPTQ defaults are 4 bits, group size 128, activation-order False. <br />
 EXL2 defaults to 8 head bits but there is no default bitrate. <br />
 GGUF defaults to no imatrix but there is no default quant-type. <br />
 HQQ defaults to 4 bits, group size 64, zero_point=True. <br />
+llm-compressor defaults to w8a8 int8. <br />
 
 <br/>
 
