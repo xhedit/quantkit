@@ -412,6 +412,99 @@ def run_hqq(model, output, hf_cache, bits, group_size, zero_point, scale, offloa
     dt_pq = datetime.datetime.now()
     print(f"Quantization complete ({str(end-start)} seconds) at {str(dt_pq)}")
 
+def run_compressor(model, output, hf_cache, quantization, device_map):
+    if quantization.lower() not in [x.lower() for x in ["fp8", "int8", "int4"] ]:
+        raise ValueError("quantization choice must be a valid llm-compressor quant type")
+
+    path = Path(model)
+    if path.is_dir():
+        if Path(path / "config.json").is_file():
+            model_dir = path
+        else:
+            click.echo("no config.json found in model dir")
+            return
+    else:
+        model_dir = model.split("/")[1]
+        path = Path(model_dir)
+
+        snapshot_download(model, local_dir=path, local_dir_use_symlinks=True, resume_download=True)
+
+    from transformers import AutoTokenizer, AutoModelForCausalLM
+
+    model = AutoModelForCausalLM.from_pretrained(
+        model_dir, device_map=device_map, torch_dtype="auto",
+    )
+    tokenizer = AutoTokenizer.from_pretrained(model_dir)
+
+    if output is None:
+        if quantization.lower() == "fp8":
+            output = f"{model_dir}-w8a8-fp8"
+        elif quantization.lower() == "int8":
+            output = f"{model_dir}-w8a8-int8"
+        elif quantization.lower() == "int4":
+            output = f"{model_dir}-w4a16"
+
+    quant_path = output
+
+    dt_start = datetime.datetime.now()
+    print(f"Starting llm-compressor quantization for {quant_path} at {str(dt_start)}")
+    start = time.perf_counter()
+
+    from datasets import load_dataset
+
+    NUM_CALIBRATION_SAMPLES=512
+    MAX_SEQUENCE_LENGTH=2048
+
+    # Load dataset.
+    ds = load_dataset("HuggingFaceH4/ultrachat_200k", split="train_sft")
+    ds = ds.shuffle(seed=42).select(range(NUM_CALIBRATION_SAMPLES))
+
+    # Preprocess the data into the format the model is trained with.
+    def preprocess(example):
+        return {"text": tokenizer.apply_chat_template(example["messages"], tokenize=False,)}
+    ds = ds.map(preprocess)
+
+    # Tokenize the data (be careful with bos tokens - we need add_special_tokens=False since the chat_template already added it).
+    def tokenize(sample):
+        return tokenizer(sample["text"], padding=False, max_length=MAX_SEQUENCE_LENGTH, truncation=True, add_special_tokens=False)
+    ds = ds.map(tokenize, remove_columns=ds.column_names)
+
+    from llmcompressor.transformers import oneshot
+
+    if quantization.lower() == "fp8":
+        recipe = QuantizationModifier(targets="Linear", scheme="FP8_DYNAMIC", ignore=["re:.*lm_head", "re:multi_modal_projector.*", "re:vision_model.*", "re:visual.*"])
+    elif quantization.lower() == "int8":
+        from llmcompressor.modifiers.quantization import GPTQModifier
+        from llmcompressor.modifiers.smoothquant import SmoothQuantModifier
+        recipe = [
+            SmoothQuantModifier(smoothing_strength=0.8),
+            GPTQModifier(targets="Linear", scheme="W8A8", ignore=["re:.*lm_head", "re:multi_modal_projector.*", "re:vision_model.*", "re:visual.*"]),
+        ]
+    elif quantization.lower() == "int4":
+        from llmcompressor.modifiers.quantization import GPTQModifier
+        recipe = GPTQModifier(targets="Linear", scheme="W4A16", ignore=["re:.*lm_head", "re:multi_modal_projector.*", "re:vision_model.*", "re:visual.*"])
+
+    oneshot(
+        model=model, dataset=ds,
+        recipe=recipe,
+        max_seq_length=MAX_SEQUENCE_LENGTH,
+        num_calibration_samples=NUM_CALIBRATION_SAMPLES,
+    )
+
+    model.save_pretrained(output, save_compressed=True)
+    tokenizer.save_pretrained(output)
+
+    # free GPU mem
+    del model
+    del tokenizer
+    gc.collect()
+    torch.cuda.empty_cache()
+
+    end = time.perf_counter()
+    dt_pq = datetime.datetime.now()
+    print(f"Quantization complete ({str(end-start)} seconds) at {str(dt_pq)}")
+
+
 def download_wikitrain():
     import requests
     import gzip
