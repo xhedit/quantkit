@@ -21,6 +21,7 @@ dependencies = [
     "llama-cpp-conv",
     "sentencepiece",
     "hqq",
+    "llmcompressor",
 ]
 
 [project.optional-dependencies]
